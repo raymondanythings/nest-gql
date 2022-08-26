@@ -8,6 +8,7 @@ import {
   CreateAccountOutput,
 } from './dtos/create-account.dto';
 import { User } from './entities/user.entity';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -57,7 +58,7 @@ export class UsersService {
     }
   }
 
-  async findById(id: string) {
+  async findById(id: number) {
     try {
       const user = await this.users.findOne({ where: { id } });
       if (user) {
@@ -66,8 +67,37 @@ export class UsersService {
           user,
         };
       }
+      throw new Error();
     } catch (error) {
       return { ok: false, error: 'User Not Found.' };
+    }
+  }
+
+  async editProfile(
+    userId: number,
+    { email, password }: EditProfileInput,
+  ): Promise<EditProfileOutput> {
+    try {
+      const user = await this.users.findOne({ where: { id: userId } });
+      if (email) {
+        const exist = await this.users.findOne({ where: { email } });
+        if (exist) {
+          return {
+            ok: false,
+            error: 'This email is already exist.',
+          };
+        }
+        user.email = email;
+      }
+      if (password) {
+        user.password = password;
+      }
+      await this.users.save(user);
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return { ok: false, error: 'Could not update Profile.' };
     }
   }
 }

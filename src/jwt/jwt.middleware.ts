@@ -13,17 +13,16 @@ export class JwtMiddleware implements NestMiddleware {
     if ('x-jwt' in req.headers) {
       const token = req.headers['x-jwt'];
       try {
-        const decode = this.jwtService.verify(token.toString());
-        if (typeof decode === 'object' && decode.hasOwnProperty('id')) {
+        const id = this.jwtService.verify(token.toString());
+
+        if (+id && typeof id === 'string') {
           try {
-            const { id } = decode;
-            const { user, ok } = await this.usersService.findById(id);
+            const { user, ok } = await this.usersService.findById(+id);
             if (ok) {
               req['user'] = user;
             }
           } catch (e) {}
         }
-        next();
       } catch {
         return res.status(401).json({
           ok: false,
@@ -31,5 +30,6 @@ export class JwtMiddleware implements NestMiddleware {
         });
       }
     }
+    next();
   }
 }
