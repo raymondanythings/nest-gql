@@ -37,7 +37,7 @@ export class User extends CoreEntity {
   @IsString()
   password: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.Listener })
+  @Column({ default: UserRole.Listener })
   @Field(type => UserRole, { nullable: true })
   @IsEnum(UserRole)
   @IsOptional()
